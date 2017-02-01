@@ -6,8 +6,7 @@
 
 #define BMP085_ADDRESS 0x77  // I2C address of BMP085
 
-#include "D:\Users\reuterc\Desktop\Slow control\Arduino_board_code\FreqCounter\FreqCounter.h"
-#include "D:\Users\reuterc\Desktop\Slow control\Arduino_board_code\FreqCounter\FreqCounter.cpp"
+#include <FreqCounter.h>
 
 int freq, offset, sens;
 
@@ -56,13 +55,20 @@ void setup(){
 
 void loop()
 {
- //pressure sensor and temperature read out 
+  // check for the command to write data to serial port
+  if ((!Serial.available()) || (Serial.read() != 'r')) {
+    return;
+  }
   
+  //
+  //pressure sensor and temperature read out 
+  //
   float temperature = bmp085GetTemperature(bmp085ReadUT()); //MUST be called first
   float pressure = bmp085GetPressure(bmp085ReadUP());
-  
- //magnetic field sensor read out 
-  
+
+  //
+  //magnetic field sensor read out 
+  //
   int x,y,z; //triple axis data
   float x1,y1,z1,r;
 
@@ -72,7 +78,7 @@ void loop()
   Wire.endTransmission();
   
  
- //Read data from each axis, 2 registers per axis
+  //Read data from each axis, 2 registers per axis
   Wire.requestFrom(0x1E, 6);
   if(6<=Wire.available()){
     x = Wire.read()<<8; //X msb
@@ -88,20 +94,19 @@ void loop()
   z1=((float)z*.73);
   r= (sqrt((square(x1))+(square(y1))+(square(z1))));
   
-  
- //humidity sensor readout 
- //Get Frequency
- FreqCounter::f_comp= 8;             // Set compensation to 12
- FreqCounter::start(1000);            // Start counting with gatetime of 1000ms
- while (FreqCounter::f_ready == 0)         // wait until counter ready 
- freq=FreqCounter::f_freq;            // read result
+  //
+  //humidity sensor readout 
+  //
+  //Get Frequency
+  FreqCounter::f_comp= 8;             // Set compensation to 12
+  FreqCounter::start(1000);            // Start counting with gatetime of 1000ms
+  while (FreqCounter::f_ready == 0)         // wait until counter ready 
+  freq=FreqCounter::f_freq;            // read result
  
  //Calculate RH
  //float RH =  (offset-freq)*sens/4096; //Sure, you can use int - depending on what do you need
  //float RH = ((float)(offset -freq))*(float)sens/4096.0;
  float RH = ((float)(offset -freq)*sens)/4096.0;
- 
- //delay(1000); //wait a second and get values again.
  
  //print out the values as a final step
  
