@@ -108,8 +108,6 @@ void loop()
  //float RH = ((float)(offset -freq))*(float)sens/4096.0;
  float RH = ((float)(offset -freq)*sens)/4096.0;
  
- //delay(1000); //wait a second and get values again.
- 
  //print out the values as a final step
  
   Serial.print("temperature: ");
